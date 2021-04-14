@@ -11,6 +11,8 @@ const getHospitales = async(req, res = response) => {
         hospitales
     })
 }
+
+
 const crearHospital = async(req, res = response) => {
     const uid = req.uid;
     const hospital = new Hospital({
@@ -37,26 +39,81 @@ const crearHospital = async(req, res = response) => {
 
 }
 
-const actualizarHospital = (req, res = response) => {
+const actualizarHospital = async(req, res = response) => {
+    const id = req.params.id;
+    const uid = req.uid;
+    try {
 
-    res.json({
-        ok: true,
-        msg: 'actualizarHospital'
-    })
-}
-const borrarHospital = (req, res = response) => {
+        const hospital = await Hospital.findById(id);
+        if (!hospital) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Hospital no encontrado por id',
 
-    res.json({
-        ok: true,
-        msg: 'borrarHospital'
-    })
+            });
+
+        }
+
+        const cambiosHospital = {
+            ...req.body,
+            usuario: uid
+
+        }
+        const hospitalActualizado = await Hospital.findByIdAndUpdate(id, cambiosHospital, { new: true });
+
+        res.json({
+            ok: true,
+            msg: 'actualizarHospital',
+            hospital: hospitalActualizado
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: "Hablo con admin"
+        })
+
+    }
+
 }
+
+const borrarHospital = async(req, res = response) => {
+
+    const id = req.params.id;
+
+    try {
+
+        const hospital = await Hospital.findById(id);
+        if (!hospital) {
+            return res.status(404).json({
+                ok: true,
+                msg: 'Hospital no encontrado por id',
+
+            });
+
+        }
+        await Hospital.findByIdAndDelete(id);
+        res.json({
+            ok: true,
+            msg: 'Hospital Borrado '
+
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: "Hablo con admin"
+        })
+    }
+}
+
 
 
 
 module.exports = {
-    getHospitales,
+
     crearHospital,
+    getHospitales,
     actualizarHospital,
-    borrarHospital
+    borrarHospital,
 }
