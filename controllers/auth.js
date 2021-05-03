@@ -65,6 +65,7 @@ const googleSignIn = async(req, res = response) => {
             //existe usuario
             usuario = usuarioDB;
             usuario.google = true;
+            if (!usuario.img) usuario.img = picture;
             //usuario.password =true;
         }
 
@@ -93,9 +94,14 @@ const renewToken = async(req, res = response) => {
     const uid = req.uid;
     //Generar el TOKEN -jwt
     const token = await generarJWT(uid);
+
+    //obtener usuario por uid
+
+    const usuario = await Usuario.findById(uid);
     res.json({
         ok: true,
-        token
+        token,
+        usuario
     })
 }
 module.exports = {
